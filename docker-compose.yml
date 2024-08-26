@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  postgresql-db-accommodation:
+    image: postgres:latest
+    ports:
+      - "5434:5432"
+    networks:
+      - devops_network
+    environment:
+      POSTGRES_DB: accommodation_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - postgresql-db-accommodation:/var/lib/postgresql/data
+
+  accommodation-service:
+    build: .
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql-db-accommodation:5432/accommodation_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8081:8081"
+    networks:
+      - devops_network
+    depends_on:
+      - postgresql-db-accommodation
+    restart: on-failure
+
+networks:
+  devops_network:
+    driver: bridge
+
+volumes:
+  postgresql-db-accommodation:
